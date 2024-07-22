@@ -26,7 +26,7 @@ func main() {
 	}
 	defer dbs.Close()
 
-	result, err := dbs.Exec("UPDATE players t  SET t.withdraw_sc = t.withdraw_sc + 1 WHERE t.uid = 43368;")
+	result, err := dbs.Exec("insert into players(uid, withdraw_sc) value (43, 1) on duplicate key update withdraw_sc = withdraw_sc+1;")
 	if err != nil {
 		log.Fatal("cat not get ", err.Error())
 		return
