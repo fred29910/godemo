@@ -1,0 +1,16 @@
+vendor/
+idea/
+vscode/
+build/
+bin/
+# ignore local config file
+*.local.*
+
+grpc-clicker.json
+
+.DS_Store
+.vscode/
+*.a
+*.log
+*.exe
+*.db
