@@ -33,11 +33,33 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	// err = db.AutoMigrate(&LoginRecord{})
-	// if err != nil {
-	// 	panic(err)
-	// }
-	t := time.Date(2024, time.January, 17, 9, 0, 0, 0, time.UTC)
+	// createDatas(db)
+	data, err := calConsecutiveDayes(db)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(data)
+}
+
+func createDatas(db *gorm.DB) {
+	for i := 0; i < 6; i++ {
+		t := time.Date(2024, time.August, i+1, 9, 0, 0, 0, time.UTC)
+		createData(db, t)
+	}
+}
+
+// createData creates a new LoginRecord in the database with the given UID, year,
+// and month, and updates the days field to include the current day. If a record
+// with the same UID, year, and month already exists, the days field is updated
+// to include the current day.
+//
+// Parameters:
+// - db: a pointer to a gorm.DB object representing the database connection.
+//
+// Return type: None.
+func createData(db *gorm.DB, t time.Time) {
+	// t := time.Date(2024, time.January, 3, 9, 0, 0, 0, time.UTC)
 	info := &LoginRecord{
 		UID:   130,
 		Year:  t.Year(),
@@ -62,6 +84,62 @@ func main() {
 		panic(result.Error)
 	}
 	fmt.Println(result.RowsAffected, info.ID)
+}
+
+// calConsecutiveDayes calculates the consecutive days for a given database connection.
+//
+// Parameters:
+// - db: a pointer to a gorm.DB object representing the database connection.
+//
+// Return type: None.
+func calConsecutiveDayes(db *gorm.DB) (*LoginConsecutiveDayes, error) {
+	uid := 130
+	t := time.Now()
+	var logs []LoginRecord
+	if err := db.Model(&LoginRecord{}).Where("uid = ?", uid).Order("id desc").Find(&logs).Error; err != nil {
+		return nil, err
+	}
+	data := &LoginConsecutiveDayes{
+		HasLogin: len(logs) > 0,
+	}
+
+	if len(logs) == 0 {
+		data.ConsecutiveDayes = 0
+		return data, nil
+	}
+
+	countUserLoginConsecutive := func() int {
+		month := t.Month()
+		year := t.Year()
+		dayOfMonth := t.Day()
+		count := 0
+		for i, logdata := range logs {
+			if i == 0 {
+				if logdata.Year < year {
+					return 0
+				}
+				if logdata.Month < int(month) {
+					return 0
+				}
+			}
+			dom := dayOfMonth
+			if i != 0 {
+				dom = DaysInCurrentMonth(logdata.Year, logdata.Month)
+			}
+
+			countMonth, ok := logdata.CountConsecutiveDays(dom)
+			count += countMonth
+			if !ok {
+				break
+			}
+		}
+		return count
+	}
+	count := countUserLoginConsecutive()
+
+	data.ConsecutiveDayes = count
+
+	return data, nil
 }
 
 type LoginRecord struct {
@@ -116,7 +194,7 @@ func UpdateLogin(user *LoginRecord, dayOfMonth int) {
 
 // CheckLoginDay 检测是否登陆
 func CheckLoginDay(user *LoginRecord, dayOfMonth int) bool {
-	if dayOfMonth < 0 || dayOfMonth >= 31 {
+	if dayOfMonth < 1 || dayOfMonth > 31 {
 		return false
 	}
 	return user.Days&(1<<dayOfMonth) != 0
