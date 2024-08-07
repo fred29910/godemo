@@ -20,29 +20,31 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	t := time.Date(2024, time.May, 6, 9, 0, 0, 0, time.UTC)
+	t := time.Date(2024, time.June, 12, 9, 0, 0, 0, time.UTC)
 	info := &LoginRecord{
 		UID:   130,
 		Year:  t.Year(),
 		Month: int(t.Month()),
 	}
 	UpdateLogin(info, t.Day())
-	updataSql := fmt.Sprintf("UPDATE user_login_record t SET t.days = t.days | (1 << %d) WHERE t.uid = %d   and t.month = %d   and t.year = %d;", t.Day(), info.UID, t.Month(), t.Year())
-	result := db.Exec(updataSql)
+	// updataSql := fmt.Sprintf("UPDATE user_login_record t SET t.days = t.days | (1 << %d) WHERE t.uid = %d   and t.month = %d   and t.year = %d;", t.Day(), info.UID, t.Month(), t.Year())
+	// result := db.Exec(updataSql)
+	// if result.Error != nil {
+	// 	panic(result)
+	// }
+	// if result.RowsAffected != 0 {
+	// 	return
+	// }
+
+	result := db.Model(info).Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "uid"}, {Name: "year"}, {Name: "month"}},
+		DoUpdates: clause.Assignments(map[string]interface{}{"days": gorm.Expr(fmt.Sprintf("days | (1 << %d)", t.Day()))}),
+	}).Create(info)
+
 	if result.Error != nil {
-		panic(result)
+		panic(result.Error)
 	}
-	if result.RowsAffected != 0 {
-		return
-	}
-
-	err = db.Model(info).Clauses(clause.OnConflict{
-		DoUpdates: clause.AssignmentColumns([]string{"update_time", "days"}),
-	}).Create(info).Error
-
-	if err != nil {
-		panic(err)
-	}
+	fmt.Println(result, info.ID)
 }
 
 type LoginRecord struct {
