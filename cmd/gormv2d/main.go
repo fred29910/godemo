@@ -7,9 +7,9 @@ import (
 
 func main() {
 	// 获取当前时间
-	now := time.Now()
+	summerDay := time.Date(2024, 8, 11, 6, 0, 0, 9, time.UTC)
 
-	usWestTime(now)
+	usWestTime(summerDay)
 	pvTime := time.Date(2023, time.December, 3, 3, 0, 9, 9, time.UTC)
 	usWestTime(pvTime)
 }
@@ -27,7 +27,11 @@ func usWestTime(now time.Time) {
 
 	zoneName, offset := pacificTime.Zone()
 	// 获取并打印当前时间及其时区信息
-	fmt.Println("Current Time in Pacific Time Zone:", pacificTime)
+	fmt.Println("\nCurrent Time in Pacific Time Zone:", pacificTime)
 	fmt.Println("Time Zone Name:", zoneName)
 	fmt.Println("UTC Offset in Seconds:", offset)
+
+	fmt.Println("\nmonth:", pacificTime.Month())
+	fmt.Println("day:", pacificTime.Day())
+	fmt.Println("hour:", pacificTime.Hour())
 }
