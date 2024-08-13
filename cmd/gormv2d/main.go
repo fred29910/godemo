@@ -17,14 +17,15 @@ func main() {
 	}
 	defer db.Close()
 
+	var id int64 = 2
 	var t uint8 = 1
-	var name string = "test"
-	var desc string = "test"
-	var status uint8 = 0
-	var day uint32 = 1
+	var name string = "test x"
+	var desc string = "test xxx"
+	var status uint8 = 1
+	var day uint32 = 2
 	var startTime time.Time = time.Now()
 	err = UpsertRewardConfig(db, context.Background(), &RewardEditCfgReq{
-		ID:        nil,
+		ID:        &id,
 		Type:      &t,
 		Name:      &name,
 		Desc:      &desc,
@@ -32,9 +33,9 @@ func main() {
 		Status:    &status,
 		Day:       &day,
 		CurrencyMap: map[int64]int64{
-			1: 100,
-			2: 200,
-			3: 300,
+			1: 200,
+			2: 300,
+			3: 400,
 		},
 	})
 
@@ -54,6 +55,13 @@ func main() {
 		return
 	}
 	log.Println("list ", list)
+
+	info, err := GetRewardConfigInfo(db, context.Background(), id)
+	if err != nil {
+		log.Println("GetRewardConfigInfo err ", err)
+		return
+	}
+	log.Println("info ", info)
 }
 
 type RewardCfg struct {
