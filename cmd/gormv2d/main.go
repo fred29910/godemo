@@ -2,6 +2,9 @@ package main
 
 import (
 	"context"
+	"database/sql"
+	"errors"
+	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 )
@@ -14,7 +17,11 @@ func main() {
 	}
 	db.LogMode(true)
 	defer db.Close()
-	GetUserRegisterRewardTime(db, context.Background(), 1)
+	i, err := GetUserWithdrawSc(db, context.Background(), 1)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(i)
 }
 
 func GetUserRegisterRewardTime(db *gorm.DB, ctx context.Context, uid int) (int64, error) {
@@ -27,4 +34,16 @@ func GetUserRegisterRewardTime(db *gorm.DB, ctx context.Context, uid int) (int64
 		return 0, err
 	}
 	return logInRds.RewardTime, nil
+}
+func GetUserWithdrawSc(db *gorm.DB, ctx context.Context, uid int) (int, error) {
+	// 查询单个数据
+	var withdraw_sc int
+	query := "SELECT withdraw_sc FROM players WHERE uid = ?"
+
+	// 使用 QueryRow 来查询单个数据
+	err := db.DB().QueryRow(query, uid).Scan(&withdraw_sc)
+	if errors.Is(err, sql.ErrNoRows) {
+		return 0, nil
+	}
+	return withdraw_sc, err
 }
