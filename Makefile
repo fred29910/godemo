@@ -2,7 +2,7 @@ build:
 	go build -ldflags "-s -w"  -trimpath -o build/ ./cmd/...
 
 clean:
-	rm -rf build
+	rm -rf build cmd/geodemo/*.zip
 
 
 
