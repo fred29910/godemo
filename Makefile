@@ -1,5 +1,5 @@
 build:
-	GOOS=js GOARCH=wasm go build -ldflags "-s -w" -trimpath -o build/main.wasm ./cmd/wasmdemo
+	go build -ldflags "-s -w"  -trimpath -o build/ ./cmd/...
 
 clean:
 	rm -rf build
