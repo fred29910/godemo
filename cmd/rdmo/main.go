@@ -12,31 +12,49 @@ var ctx = context.Background()
 func ExampleClient() {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
-		Password: "", // no password set
-		DB:       0,  // use default DB
+		Password: "redisaabbcc", // no password set
+		DB:       0,             // use default DB
 	})
 
-	err := rdb.Set(ctx, "key", "value", 0).Err()
+	// 添加一些成员到集合
+	err := rdb.SAdd(ctx, "myset", "member1", "member2", "member3").Err()
 	if err != nil {
-		panic(err)
+		fmt.Println("Error adding members to set:", err)
+		return
 	}
 
-	val, err := rdb.Get(ctx, "key").Result()
+	// 检查成员是否存在于集合中
+	isMember, err := rdb.SIsMember(ctx, "myset", "member2").Result()
 	if err != nil {
-		panic(err)
+		fmt.Println("Error checking if member exists:", err)
+		return
 	}
-	fmt.Println("key", val)
 
-	val2, err := rdb.Get(ctx, "key2").Result()
-	if err == redis.Nil {
-		fmt.Println("key2 does not exist")
-	} else if err != nil {
-		panic(err)
+	if isMember {
+		fmt.Println("member2 exists in myset")
 	} else {
-		fmt.Println("key2", val2)
+		fmt.Println("member2 does not exist in myset")
 	}
-	// Output: key value
-	// key2 does not exist
+
+	// 也可以检查一个不存在的成员
+	isMember, err = rdb.SIsMember(ctx, "myset", "member4").Result()
+	if err != nil {
+		fmt.Println("Error checking if member exists:", err)
+		return
+	}
+
+	if isMember {
+		fmt.Println("member4 exists in myset")
+	} else {
+		fmt.Println("member4 does not exist in myset")
+	}
+
+	// 也可以检查一个不存在key
+	isMember, err = rdb.SIsMember(ctx, "myset1xiaimsdiaimsma", "member4").Result()
+	if err != nil {
+		fmt.Println("Error checking if member exists:", err)
+		return
+	}
 }
 
 func main() {
