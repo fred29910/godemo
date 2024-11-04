@@ -19,12 +19,12 @@ func main() {
 			SlowThreshold:             time.Second, // Slow SQL threshold
 			LogLevel:                  logger.Info, // Log level
 			IgnoreRecordNotFoundError: true,        // Ignore ErrRecordNotFound error for logger
-			ParameterizedQueries:      true,        // Don't include params in the SQL log
-			Colorful:                  false,       // Disable color
+			// ParameterizedQueries:      true,        // Don't include params in the SQL log
+			Colorful: false, // Disable color
 		},
 	)
 
-	dns := "root:12345#lxikm@tcp(127.0.0.1:3307)/dbv"
+	dns := "root:12345#lxikm@tcp(127.0.0.1:3307)/dbv?parseTime=true&loc=Local"
 	db, err := gorm.Open(mysql.Open(dns), &gorm.Config{
 		Logger: newLogger,
 	})
@@ -32,13 +32,47 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	var data string
-	err = db.Table(TableName).Select("ip").Where("id = ?", 1).Pluck("ip", &data).Error
+
+	// db.Model(&PromoCode{}).Create(&PromoCode{
+	// 	Status: 1,
+	// 	Code:   "test",
+	// 	Info:   "test",
+	// })
+
+	var promoCodes []*PromoCode
+
+	query := db.Model(&PromoCode{})
+
+	query.Where("status = ?", 1)
+	query.Where("info like ?", `%test%`)
+
+	query.Where("created_at < ?", time.Now())
+	err = query.Find(&promoCodes).Error
+
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Println(data)
+	log.Println(fmt.Sprintf("%+v", promoCodes))
 }
 
-const TableName = "coin_white_ip"
+type PromoCode struct {
+	gorm.Model
+	Status int    `json:"status" gorm:"column:status"`
+	Code   string `json:"code" gorm:"column:code"`
+	Info   string `json:"info" gorm:"column:info"`
+}
+
+const PromoCodeTableName = "promo_code"
+
+func (PromoCode) TableName() string {
+	return PromoCodeTableName
+}
+
+// type PromoCodeDao struct {
+// 	Status    int        `json:"status" gorm:"column:status"`
+// 	Code      string     `json:"code" gorm:"column:code"`
+// 	Info      string     `json:"info" gorm:"column:info"`
+// 	ID        uint       `json:"id" gorm:"column:id"`
+// 	CreatedAt *time.Time `json:"created_at" gorm:"column:created_at"`
+// }
