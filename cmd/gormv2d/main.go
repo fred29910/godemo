@@ -7,12 +7,14 @@ import (
 
 func main() {
 	// 获取当前时间
-	summerDay := time.Date(2024, 8, 11, 6, 0, 0, 9, time.UTC)
+	// summerDay := time.Date(2024, 8, 11, 6, 0, 0, 9, time.UTC)
 
-	usWestTime(summerDay)
-	pvTime := time.Date(2023, time.December, 3, 3, 0, 9, 9, time.UTC)
+	// usWestTime(summerDay)
+	// pvTime := time.Date(2023, time.December, 3, 3, 0, 9, 9, time.UTC)
+	// usWestTime(pvTie)
+	pvTime := time.Unix(1730703600, 0)
 	usWestTime(pvTime)
-	usWestTime(time.Now())
+	// usWestTime(time.Now())
 }
 
 func usWestTime(now time.Time) {
@@ -35,4 +37,5 @@ func usWestTime(now time.Time) {
 	fmt.Println("\nmonth:", pacificTime.Month())
 	fmt.Println("day:", pacificTime.Day())
 	fmt.Println("hour:", pacificTime.Hour())
+
 }
