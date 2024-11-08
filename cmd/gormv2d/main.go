@@ -1,11 +1,12 @@
 package main
 
 import (
-	"fmt"
+	"encoding/json"
 	"log"
 	"os"
 	"time"
 
+	"gorm.io/datatypes"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -24,7 +25,7 @@ func main() {
 		},
 	)
 
-	dns := "root:12345#lxikm@tcp(127.0.0.1:3307)/dbv?parseTime=true&loc=Local"
+	dns := "root:12345#lxikm@tcp(127.0.0.1:3306)/test?parseTime=true&loc=Local"
 	db, err := gorm.Open(mysql.Open(dns), &gorm.Config{
 		Logger: newLogger,
 	})
@@ -32,11 +33,25 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	// err = db.Migrator().AutoMigrate(&PromoCode{})
 
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	// attr := map[string]interface{}{
+	// 	"test":  "test",
+	// 	"test1": "test1",
+	// 	"test2": "test2",
+	// }
+
+	// atrJson, _ := json.Marshal(attr)
 	// db.Model(&PromoCode{}).Create(&PromoCode{
 	// 	Status: 1,
 	// 	Code:   "test",
 	// 	Info:   "test",
+
+	// 	Attributes: datatypes.JSON(atrJson),
 	// })
 
 	var promoCodes []*PromoCode
@@ -53,14 +68,21 @@ func main() {
 		panic(err)
 	}
 
-	log.Println(fmt.Sprintf("%+v", promoCodes))
+	dataJson, _ := json.Marshal(promoCodes)
+	log.Println(string(dataJson))
 }
 
 type PromoCode struct {
-	gorm.Model
+	ID        uint           `gorm:"primarykey" json:"id"`
+	CreatedAt time.Time      `json:"created_at" gorm:"column:created_at"`
+	UpdatedAt time.Time      `json:"updated_at" gorm:"column:updated_at"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"deleted_at,omitempty"`
+
 	Status int    `json:"status" gorm:"column:status"`
 	Code   string `json:"code" gorm:"column:code"`
 	Info   string `json:"info" gorm:"column:info"`
+
+	Attributes datatypes.JSON `json:"attributes" gorm:"column:attributes"`
 }
 
 const PromoCodeTableName = "promo_code"
