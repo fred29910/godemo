@@ -12,7 +12,7 @@ func main() {
 	// usWestTime(summerDay)
 	// pvTime := time.Date(2023, time.December, 3, 3, 0, 9, 9, time.UTC)
 	// usWestTime(pvTie)
-	pvTime := time.Unix(1730703600, 0)
+	pvTime := time.Unix(1730793600, 0)
 	usWestTime(pvTime)
 	// usWestTime(time.Now())
 }
