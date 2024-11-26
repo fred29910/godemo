@@ -25,7 +25,7 @@ func main() {
 		},
 	)
 
-	dns := "root:12345#lxikm@tcp(127.0.0.1:3306)/test?parseTime=true&loc=Local"
+	dns := "root:12345#lxikm@tcp(127.0.0.1:3306)/dbv?parseTime=true&loc=Local"
 	db, err := gorm.Open(mysql.Open(dns), &gorm.Config{
 		Logger: newLogger,
 	})
@@ -53,6 +53,15 @@ func main() {
 
 	// 	Attributes: datatypes.JSON(atrJson),
 	// })
+
+	upsMap := make(map[string]interface{})
+
+	upsMap["attributes"] = nil
+
+	err = db.Model(&PromoCode{}).Where("id = ?", 1).Updates(upsMap).Error
+	if err != nil {
+		panic(err)
+	}
 
 	var promoCodes []*PromoCode
 
