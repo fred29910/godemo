@@ -1,22 +1,51 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	"log"
+	"math/rand"
+	"time"
 )
 
 func main() {
 
-	s := make([]int, 2, 4) // len=2, cap=4
-	s[0], s[1] = 1, 2
-	fmt.Printf("Before append: len=%d, cap=%d, addr=%p\n", len(s), cap(s), s)
+	buffer := make([]byte, 1024)
 
-	c := append(s, 3) // 不超过 cap=4, 直接使用原数组
-	fmt.Printf("After  append: len=%d, cap=%d, addr=%p %v\n", len(c), cap(c), c, c)
-	fmt.Printf("After  append: len=%d, cap=%d, addr=%p %v\n", len(s), cap(s), s, s)
+	leftByte := 0
+	data := []byte(randomString(129))
+	leftByte += len(data)
+	copy(buffer, data)
 
-	d := append(s, 4, 5, 8, 5) // 超出 cap=4, 需要分配新数组
-	fmt.Printf("After 2nd append: len=%d, cap=%d, addr=%p %v\n", len(d), cap(d), d, d)
-	fmt.Printf("After 2nd append: len=%d, cap=%d, addr=%p %v\n", len(s), cap(s), s, s)
+	processedLength := leftByte
+
+	copy(buffer, buffer[processedLength:leftByte])
+
+	leftByte -= processedLength
+
+	data2 := []byte(randomString(100))
+
+	bufReader := bytes.NewBuffer(data2)
+
+	l, err := bufReader.Read(buffer[leftByte:])
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	log.Printf("read %d bytes", l)
+
+	fmt.Println(string(buffer))
 
 }
+
+func randomString(length int) string {
+	rand.Seed(time.Now().UnixNano()) // 设定随机种子
+	result := make([]byte, length)
+	for i := range result {
+		result[i] = charset[rand.Intn(len(charset))]
+	}
+	return string(result)
+}
+
+const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
