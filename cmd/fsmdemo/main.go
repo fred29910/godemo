@@ -25,6 +25,12 @@ func NewDoor(to string) *Door {
 		},
 		fsm.Callbacks{
 			"enter_state": func(_ context.Context, e *fsm.Event) { d.enterState(e) },
+			"open": func(_ context.Context, e *fsm.Event) {
+				fmt.Printf("%s enter state %s\n", e.Src, e.Dst)
+			},
+			"close": func(_ context.Context, e *fsm.Event) {
+				fmt.Printf("%s enter state %s\n", e.Src, e.Dst)
+			},
 		},
 	)
 
@@ -39,11 +45,6 @@ func main() {
 	door := NewDoor("heaven")
 
 	err := door.FSM.Event(context.Background(), "open")
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	err = door.FSM.Event(context.Background(), "open")
 	if err != nil {
 		fmt.Println(err)
 	}
