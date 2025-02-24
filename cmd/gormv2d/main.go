@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"log"
 	"os"
 	"time"
@@ -33,7 +32,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	// err = db.Migrator().AutoMigrate(&PromoCode{})
+	// err = db.Migrator().AutoMigrate(&ScFinanceReport{})
 
 	// if err != nil {
 	// 	panic(err)
@@ -54,31 +53,26 @@ func main() {
 	// 	Attributes: datatypes.JSON(atrJson),
 	// })
 
-	upsMap := make(map[string]interface{})
+	dataRp := &ScFinanceReport{
+		Hour:                time.Now(),
+		StartTime:           time.Now(),
+		EndTime:             time.Now(),
+		ScTotalEnding:       100,
+		ScRedeemableEnding:  100,
+		UsdPurchased:        100,
+		ScWasRedeemed:       100,
+		ScRedeemableCreated: 100,
 
-	upsMap["attributes"] = nil
+		ScRedeemableRemoved: map[uint32]uint64{1: 232, 2: 232},
+		ScTotalCreated:      map[uint32]uint64{1: 232, 2: 232},
+		ScTotalRemoved:      nil,
+	}
 
-	err = db.Model(&PromoCode{}).Where("id = ?", 1).Updates(upsMap).Error
+	err = db.Model(&ScFinanceReport{}).Create(&dataRp).Error
 	if err != nil {
 		panic(err)
 	}
 
-	var promoCodes []*PromoCode
-
-	query := db.Model(&PromoCode{})
-
-	query.Where("status = ?", 1)
-	query.Where("info like ?", `%test%`)
-
-	query.Where("created_at < ?", time.Now())
-	err = query.Find(&promoCodes).Error
-
-	if err != nil {
-		panic(err)
-	}
-
-	dataJson, _ := json.Marshal(promoCodes)
-	log.Println(string(dataJson))
 }
 
 type PromoCode struct {
@@ -107,3 +101,28 @@ func (PromoCode) TableName() string {
 // 	ID        uint       `json:"id" gorm:"column:id"`
 // 	CreatedAt *time.Time `json:"created_at" gorm:"column:created_at"`
 // }
+
+type ScFinanceReport struct {
+	ID        uint64    `json:"id"`
+	Hour      time.Time `gorm:"UNIQUE_INDEX:once_id_hour" json:"hour"`
+	CreatedAt time.Time `json:"created_at"` // 資料紀錄時間
+	UpdatedAt time.Time `json:"updated_at"` // 資料修改時間
+
+	StartTime           time.Time         `json:"start_time"` // 开始时间
+	EndTime             time.Time         `json:"end_time"`   // 结束时间
+	ScTotalEnding       uint64            `json:"sc_total_ending"`
+	ScRedeemableEnding  uint64            `json:"sc_redeemable_ending"`
+	UsdPurchased        uint64            `json:"usd_purchasesd"`
+	ScWasRedeemed       uint64            `json:"sc_was_redeemed,omitempty"`
+	ScRedeemableCreated uint64            `json:"sc_redeemable_created,omitempty"`
+	ScRedeemableRemoved map[uint32]uint64 `json:"sc_redeemable_removed,omitempty" gorm:"serializer:json"`
+	ScTotalCreated      map[uint32]uint64 `json:"sc_total_created,omitempty" gorm:"serializer:json"`
+	ScTotalRemoved      map[uint32]uint64 `json:"sc_total_removed,omitempty" gorm:"serializer:json"`
+
+	Rake      uint64 `json:"rake"`
+	SystemEat uint64 `json:"system_eat"`
+}
+
+func (s *ScFinanceReport) TableName() string {
+	return "sc_finance_report"
+}
