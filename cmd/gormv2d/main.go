@@ -2,6 +2,9 @@ package main
 
 import (
 	"log"
+	"os"
+	"path/filepath"
+	"strings"
 
 	"gorm.io/gen"
 	"gorm.io/gorm"
@@ -10,16 +13,38 @@ import (
 
 func main() {
 
+	genGormDb("/home/fred/workspace/wptglobal/clubwpt-backend/build/database/db_coin_test/", "internal/coin/query")
+	genGormDb("/home/fred/workspace/wptglobal/clubwpt-backend/build/database/db_service_test/", "internal/service/query")
+}
+
+func genGormDb(sqlPath string, outPath string) {
+
 	// dns := "root:12345#lxikm@tcp(127.0.0.1:3306)/dbv?parseTime=true&loc=Local"
 	// gormdb, err := gorm.Open(mysql.Open(dns), &gorm.Config{
 	// 	Logger: newLogger,
 	// })
+	// sqlPath := "/home/fred/workspace/wptglobal/clubwpt-backend/build/database/db_coin_test/"
+	var sqlfiles []string
+	// 遍历目录
+	err := filepath.Walk(sqlPath, func(path string, f os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if f.IsDir() {
+			return nil
+		}
+		if !strings.HasSuffix(path, ".sql") {
+			return nil
+		}
+		sqlfiles = append(sqlfiles, path)
+		return nil
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
 	gormdb, err := gorm.Open(rawsql.New(rawsql.Config{
 		//SQL:      rawsql,                      //create table sql
-		FilePath: []string{
-			//"./sql/user.sql", // create table sql file
-			"/home/fred/workspace/wptglobal/clubwpt-backend/build/database/db_coin_test/rewards_cfg.sql", // create table sql file directory
-		},
+		FilePath: sqlfiles,
 	}))
 
 	if err != nil {
@@ -27,7 +52,7 @@ func main() {
 	}
 
 	g := gen.NewGenerator(gen.Config{
-		OutPath:           "internal/query",
+		OutPath:           outPath,                                                            //"internal/query"
 		Mode:              gen.WithoutContext | gen.WithDefaultQuery | gen.WithQueryInterface, // generate mode
 		FieldNullable:     true,                                                               // generate pointer at struct
 		FieldCoverable:    true,
