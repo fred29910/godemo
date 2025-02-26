@@ -2,40 +2,39 @@ package main
 
 import (
 	"log"
-	"os"
-	"time"
 
-	"gorm.io/driver/mysql"
 	"gorm.io/gen"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
+	"gorm.io/rawsql"
 )
 
 func main() {
 
-	newLogger := logger.New(
-		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
-		logger.Config{
-			SlowThreshold:             time.Second, // Slow SQL threshold
-			LogLevel:                  logger.Info, // Log level
-			IgnoreRecordNotFoundError: true,        // Ignore ErrRecordNotFound error for logger
-			// ParameterizedQueries:      true,        // Don't include params in the SQL log
-			Colorful: false, // Disable color
+	// dns := "root:12345#lxikm@tcp(127.0.0.1:3306)/dbv?parseTime=true&loc=Local"
+	// gormdb, err := gorm.Open(mysql.Open(dns), &gorm.Config{
+	// 	Logger: newLogger,
+	// })
+	gormdb, err := gorm.Open(rawsql.New(rawsql.Config{
+		//SQL:      rawsql,                      //create table sql
+		FilePath: []string{
+			//"./sql/user.sql", // create table sql file
+			"/home/fred/workspace/wptglobal/clubwpt-backend/build/database/db_coin_test/rewards_cfg.sql", // create table sql file directory
 		},
-	)
-
-	dns := "root:12345#lxikm@tcp(127.0.0.1:3306)/dbv?parseTime=true&loc=Local"
-	gormdb, err := gorm.Open(mysql.Open(dns), &gorm.Config{
-		Logger: newLogger,
-	})
+	}))
 
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	g := gen.NewGenerator(gen.Config{
-		OutPath: "internal/query",
-		Mode:    gen.WithoutContext | gen.WithDefaultQuery | gen.WithQueryInterface, // generate mode
+		OutPath:           "internal/query",
+		Mode:              gen.WithoutContext | gen.WithDefaultQuery | gen.WithQueryInterface, // generate mode
+		FieldNullable:     true,                                                               // generate pointer at struct
+		FieldCoverable:    true,
+		FieldSignable:     true,
+		FieldWithIndexTag: true,
+		FieldWithTypeTag:  true,
+		WithUnitTest:      true,
 	})
 
 	// gormdb, _ := gorm.Open(mysql.Open("root:@(127.0.0.1:3306)/demo?charset=utf8mb4&parseTime=True&loc=Local"))

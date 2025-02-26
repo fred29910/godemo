@@ -16,69 +16,34 @@ import (
 )
 
 var (
-	Q                = new(Query)
-	FreezeCoin       *freezeCoin
-	FreezeCoinDetail *freezeCoinDetail
-	GeoInfo          *geoInfo
-	PromoCode        *promoCode
-	RewardRecord     *rewardRecord
-	RewardsCfg       *rewardsCfg
-	UserLoginRecord  *userLoginRecord
-	VpnInfo          *vpnInfo
+	Q          = new(Query)
+	RewardsCfg *rewardsCfg
 )
 
 func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	*Q = *Use(db, opts...)
-	FreezeCoin = &Q.FreezeCoin
-	FreezeCoinDetail = &Q.FreezeCoinDetail
-	GeoInfo = &Q.GeoInfo
-	PromoCode = &Q.PromoCode
-	RewardRecord = &Q.RewardRecord
 	RewardsCfg = &Q.RewardsCfg
-	UserLoginRecord = &Q.UserLoginRecord
-	VpnInfo = &Q.VpnInfo
 }
 
 func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 	return &Query{
-		db:               db,
-		FreezeCoin:       newFreezeCoin(db, opts...),
-		FreezeCoinDetail: newFreezeCoinDetail(db, opts...),
-		GeoInfo:          newGeoInfo(db, opts...),
-		PromoCode:        newPromoCode(db, opts...),
-		RewardRecord:     newRewardRecord(db, opts...),
-		RewardsCfg:       newRewardsCfg(db, opts...),
-		UserLoginRecord:  newUserLoginRecord(db, opts...),
-		VpnInfo:          newVpnInfo(db, opts...),
+		db:         db,
+		RewardsCfg: newRewardsCfg(db, opts...),
 	}
 }
 
 type Query struct {
 	db *gorm.DB
 
-	FreezeCoin       freezeCoin
-	FreezeCoinDetail freezeCoinDetail
-	GeoInfo          geoInfo
-	PromoCode        promoCode
-	RewardRecord     rewardRecord
-	RewardsCfg       rewardsCfg
-	UserLoginRecord  userLoginRecord
-	VpnInfo          vpnInfo
+	RewardsCfg rewardsCfg
 }
 
 func (q *Query) Available() bool { return q.db != nil }
 
 func (q *Query) clone(db *gorm.DB) *Query {
 	return &Query{
-		db:               db,
-		FreezeCoin:       q.FreezeCoin.clone(db),
-		FreezeCoinDetail: q.FreezeCoinDetail.clone(db),
-		GeoInfo:          q.GeoInfo.clone(db),
-		PromoCode:        q.PromoCode.clone(db),
-		RewardRecord:     q.RewardRecord.clone(db),
-		RewardsCfg:       q.RewardsCfg.clone(db),
-		UserLoginRecord:  q.UserLoginRecord.clone(db),
-		VpnInfo:          q.VpnInfo.clone(db),
+		db:         db,
+		RewardsCfg: q.RewardsCfg.clone(db),
 	}
 }
 
@@ -92,39 +57,18 @@ func (q *Query) WriteDB() *Query {
 
 func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 	return &Query{
-		db:               db,
-		FreezeCoin:       q.FreezeCoin.replaceDB(db),
-		FreezeCoinDetail: q.FreezeCoinDetail.replaceDB(db),
-		GeoInfo:          q.GeoInfo.replaceDB(db),
-		PromoCode:        q.PromoCode.replaceDB(db),
-		RewardRecord:     q.RewardRecord.replaceDB(db),
-		RewardsCfg:       q.RewardsCfg.replaceDB(db),
-		UserLoginRecord:  q.UserLoginRecord.replaceDB(db),
-		VpnInfo:          q.VpnInfo.replaceDB(db),
+		db:         db,
+		RewardsCfg: q.RewardsCfg.replaceDB(db),
 	}
 }
 
 type queryCtx struct {
-	FreezeCoin       IFreezeCoinDo
-	FreezeCoinDetail IFreezeCoinDetailDo
-	GeoInfo          IGeoInfoDo
-	PromoCode        IPromoCodeDo
-	RewardRecord     IRewardRecordDo
-	RewardsCfg       IRewardsCfgDo
-	UserLoginRecord  IUserLoginRecordDo
-	VpnInfo          IVpnInfoDo
+	RewardsCfg IRewardsCfgDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
-		FreezeCoin:       q.FreezeCoin.WithContext(ctx),
-		FreezeCoinDetail: q.FreezeCoinDetail.WithContext(ctx),
-		GeoInfo:          q.GeoInfo.WithContext(ctx),
-		PromoCode:        q.PromoCode.WithContext(ctx),
-		RewardRecord:     q.RewardRecord.WithContext(ctx),
-		RewardsCfg:       q.RewardsCfg.WithContext(ctx),
-		UserLoginRecord:  q.UserLoginRecord.WithContext(ctx),
-		VpnInfo:          q.VpnInfo.WithContext(ctx),
+		RewardsCfg: q.RewardsCfg.WithContext(ctx),
 	}
 }
 

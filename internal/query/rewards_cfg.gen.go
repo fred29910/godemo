@@ -37,8 +37,9 @@ func newRewardsCfg(db *gorm.DB, opts ...gen.DOOption) rewardsCfg {
 	_rewardsCfg.StartDate = field.NewTime(tableName, "start_date")
 	_rewardsCfg.EndDate = field.NewTime(tableName, "end_date")
 	_rewardsCfg.Status = field.NewInt32(tableName, "status")
-	_rewardsCfg.ClaimedCount = field.NewInt64(tableName, "claimed_count")
-	_rewardsCfg.Day = field.NewInt32(tableName, "day")
+	_rewardsCfg.ClaimedCount = field.NewUint32(tableName, "claimed_count")
+	_rewardsCfg.Day = field.NewUint32(tableName, "day")
+	_rewardsCfg.ShowPopUp = field.NewBool(tableName, "show_pop_up")
 	_rewardsCfg.RewardsItems = field.NewString(tableName, "rewards_items")
 
 	_rewardsCfg.fillFieldMap()
@@ -61,8 +62,9 @@ type rewardsCfg struct {
 	StartDate    field.Time
 	EndDate      field.Time  // end date
 	Status       field.Int32 // 状态 0 active 1 forbidden
-	ClaimedCount field.Int64
-	Day          field.Int32  // daily reward on days , just type = daily
+	ClaimedCount field.Uint32
+	Day          field.Uint32 // daily reward on days , just type = daily
+	ShowPopUp    field.Bool   // show pop up,default is 1
 	RewardsItems field.String // currencies to be rewarded
 
 	fieldMap map[string]field.Expr
@@ -90,8 +92,9 @@ func (r *rewardsCfg) updateTableName(table string) *rewardsCfg {
 	r.StartDate = field.NewTime(table, "start_date")
 	r.EndDate = field.NewTime(table, "end_date")
 	r.Status = field.NewInt32(table, "status")
-	r.ClaimedCount = field.NewInt64(table, "claimed_count")
-	r.Day = field.NewInt32(table, "day")
+	r.ClaimedCount = field.NewUint32(table, "claimed_count")
+	r.Day = field.NewUint32(table, "day")
+	r.ShowPopUp = field.NewBool(table, "show_pop_up")
 	r.RewardsItems = field.NewString(table, "rewards_items")
 
 	r.fillFieldMap()
@@ -109,7 +112,7 @@ func (r *rewardsCfg) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (r *rewardsCfg) fillFieldMap() {
-	r.fieldMap = make(map[string]field.Expr, 13)
+	r.fieldMap = make(map[string]field.Expr, 14)
 	r.fieldMap["id"] = r.ID
 	r.fieldMap["created_at"] = r.CreatedAt
 	r.fieldMap["updated_at"] = r.UpdatedAt
@@ -122,6 +125,7 @@ func (r *rewardsCfg) fillFieldMap() {
 	r.fieldMap["status"] = r.Status
 	r.fieldMap["claimed_count"] = r.ClaimedCount
 	r.fieldMap["day"] = r.Day
+	r.fieldMap["show_pop_up"] = r.ShowPopUp
 	r.fieldMap["rewards_items"] = r.RewardsItems
 }
 
