@@ -13,8 +13,9 @@ import (
 
 func main() {
 
-	genGormDb("/home/fred/workspace/wptglobal/clubwpt-backend/build/database/db_coin_test/", "internal/coin/query")
-	genGormDb("/home/fred/workspace/wptglobal/clubwpt-backend/build/database/db_service_test/", "internal/service/query")
+	// genGormDb("/home/fred/workspace/wptglobal/clubwpt-backend/build/database/db_coin_test/", "internal/coin/query")
+	// genGormDb("/home/fred/workspace/wptglobal/clubwpt-backend/build/database/db_service_test/", "internal/service/query")
+	genGormDb("/home/fred/workspace/wptglobal/clubwpt-backend/build/database/dzpk_static_test/", "internal/dzpk_static_test/query")
 }
 
 func genGormDb(sqlPath string, outPath string) {
