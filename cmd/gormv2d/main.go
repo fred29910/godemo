@@ -53,25 +53,14 @@ func main() {
 	// 	Attributes: datatypes.JSON(atrJson),
 	// })
 
-	dataRp := &ScFinanceReport{
-		Hour:                time.Now(),
-		StartTime:           time.Now(),
-		EndTime:             time.Now(),
-		ScTotalEnding:       100,
-		ScRedeemableEnding:  100,
-		UsdPurchased:        100,
-		ScWasRedeemed:       100,
-		ScRedeemableCreated: 100,
+	dataRp := ScFinanceReport{}
 
-		ScRedeemableRemoved: map[uint32]uint64{1: 232, 2: 232},
-		ScTotalCreated:      map[uint32]uint64{1: 232, 2: 232},
-		ScTotalRemoved:      nil,
-	}
-
-	err = db.Model(&ScFinanceReport{}).Create(&dataRp).Error
+	err = db.Raw("select * from sc_finance_report limit 1").Scan(&dataRp).Error
 	if err != nil {
 		panic(err)
 	}
+
+	log.Println(dataRp)
 
 }
 
