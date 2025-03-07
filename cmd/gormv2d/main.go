@@ -5,7 +5,6 @@ import (
 	"os"
 	"time"
 
-	"gorm.io/datatypes"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -52,66 +51,32 @@ func main() {
 
 	// 	Attributes: datatypes.JSON(atrJson),
 	// })
+	adminf := 1.01
 
-	dataRp := ScFinanceReport{}
+	data := MttAdminFee{
+		ID:               1,
+		PlayerID:         1,
+		MttGameID:        1,
+		AdminFee:         &adminf,
+		MttGameStartTime: time.Now(),
+		MttGameEndTime:   time.Now(),
+		CreateTime:       time.Now(),
+		UpdateTime:       time.Now(),
+	}
+	err = db.Table("mtt_admin_fees_202503").Create(&data).Error
 
-	err = db.Raw("select * from sc_finance_report limit 1").Scan(&dataRp).Error
 	if err != nil {
 		panic(err)
 	}
-
-	log.Println(dataRp)
-
 }
 
-type PromoCode struct {
-	ID        uint           `gorm:"primarykey" json:"id"`
-	CreatedAt time.Time      `json:"created_at" gorm:"column:created_at"`
-	UpdatedAt time.Time      `json:"updated_at" gorm:"column:updated_at"`
-	DeletedAt gorm.DeletedAt `gorm:"index" json:"deleted_at,omitempty"`
-
-	Status int    `json:"status" gorm:"column:status"`
-	Code   string `json:"code" gorm:"column:code"`
-	Info   string `json:"info" gorm:"column:info"`
-
-	Attributes datatypes.JSON `json:"attributes" gorm:"column:attributes"`
-}
-
-const PromoCodeTableName = "promo_code"
-
-func (PromoCode) TableName() string {
-	return PromoCodeTableName
-}
-
-// type PromoCodeDao struct {
-// 	Status    int        `json:"status" gorm:"column:status"`
-// 	Code      string     `json:"code" gorm:"column:code"`
-// 	Info      string     `json:"info" gorm:"column:info"`
-// 	ID        uint       `json:"id" gorm:"column:id"`
-// 	CreatedAt *time.Time `json:"created_at" gorm:"column:created_at"`
-// }
-
-type ScFinanceReport struct {
-	ID        uint64    `json:"id"`
-	Hour      time.Time `gorm:"UNIQUE_INDEX:once_id_hour" json:"hour"`
-	CreatedAt time.Time `json:"created_at"` // 資料紀錄時間
-	UpdatedAt time.Time `json:"updated_at"` // 資料修改時間
-
-	StartTime           time.Time         `json:"start_time"` // 开始时间
-	EndTime             time.Time         `json:"end_time"`   // 结束时间
-	ScTotalEnding       uint64            `json:"sc_total_ending"`
-	ScRedeemableEnding  uint64            `json:"sc_redeemable_ending"`
-	UsdPurchased        uint64            `json:"usd_purchasesd"`
-	ScWasRedeemed       uint64            `json:"sc_was_redeemed,omitempty"`
-	ScRedeemableCreated uint64            `json:"sc_redeemable_created,omitempty"`
-	ScRedeemableRemoved map[uint32]uint64 `json:"sc_redeemable_removed,omitempty" gorm:"serializer:json"`
-	ScTotalCreated      map[uint32]uint64 `json:"sc_total_created,omitempty" gorm:"serializer:json"`
-	ScTotalRemoved      map[uint32]uint64 `json:"sc_total_removed,omitempty" gorm:"serializer:json"`
-
-	Rake      uint64 `json:"rake"`
-	SystemEat uint64 `json:"system_eat"`
-}
-
-func (s *ScFinanceReport) TableName() string {
-	return "sc_finance_report"
+type MttAdminFee struct {
+	ID               uint64    `gorm:"column:id;type:bigint(20) unsigned;primaryKey;autoIncrement:true;comment:The squence id" json:"id"`                                             // The squence id
+	PlayerID         uint32    `gorm:"column:player_id;type:int(11) unsigned;not null;uniqueIndex:idx_player_id_mtt_game_id,priority:1;comment:The Player ID" json:"player_id"`       // The Player ID
+	MttGameID        uint32    `gorm:"column:mtt_game_id;type:int(11) unsigned;not null;uniqueIndex:idx_player_id_mtt_game_id,priority:2;comment:The mtt game id" json:"mtt_game_id"` // The mtt game id
+	AdminFee         *float64  `gorm:"column:admin_fee;type:decimal(18,2);not null;default:0.00;comment:The admin fee" json:"admin_fee"`                                              // The admin fee
+	MttGameStartTime time.Time `gorm:"column:mtt_game_start_time;type:datetime;not null;comment:The mtt game start time" json:"mtt_game_start_time"`                                  // The mtt game start time
+	MttGameEndTime   time.Time `gorm:"column:mtt_game_end_time;type:datetime;not null;comment:The mtt game end time" json:"mtt_game_end_time"`                                        // The mtt game end time
+	CreateTime       time.Time `gorm:"column:create_time;type:datetime;not null;comment:The event create time" json:"create_time"`                                                    // The event create time
+	UpdateTime       time.Time `gorm:"column:update_time;type:datetime;not null;comment:The event update time" json:"update_time"`                                                    // The event update time
 }
