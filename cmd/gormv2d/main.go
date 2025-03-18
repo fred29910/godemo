@@ -23,7 +23,7 @@ func main() {
 		},
 	)
 
-	dns := "root:12345#lxikm@tcp(127.0.0.1:3306)/dbv?parseTime=true&loc=Local"
+	dns := "deuv:2134#lxikmv@tcp(127.0.0.1:3306)/dbv?parseTime=true&loc=Local"
 	db, err := gorm.Open(mysql.Open(dns), &gorm.Config{
 		Logger: newLogger,
 	})
@@ -31,11 +31,11 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	// err = db.Migrator().AutoMigrate(&ScFinanceReport{})
+	err = db.Migrator().AutoMigrate(&MttAdminFee{})
 
-	// if err != nil {
-	// 	panic(err)
-	// }
+	if err != nil {
+		panic(err)
+	}
 
 	// attr := map[string]interface{}{
 	// 	"test":  "test",
@@ -63,7 +63,7 @@ func main() {
 		CreateTime:       time.Now(),
 		UpdateTime:       time.Now(),
 	}
-	err = db.Table("mtt_admin_fees_202503").Create(&data).Error
+	err = db.Create(&data).Error
 
 	if err != nil {
 		panic(err)
