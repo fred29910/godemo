@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 func main() {
@@ -10,10 +12,21 @@ func main() {
 	// summerDay := time.Date(2024, 8, 11, 6, 0, 0, 9, time.UTC)
 
 	// usWestTime(summerDay)
-	// pvTime := time.Date(2023, time.December, 3, 3, 0, 9, 9, time.UTC)
-	// usWestTime(pvTie)
-	pvTime := time.Unix(1730793600, 0)
-	usWestTime(pvTime)
+	loc, _ := time.LoadLocation("America/Los_Angeles")
+	JaStartTimestamp := time.Date(2024, time.January, 1, 0, 0, 0, 0, loc)
+	usWestTime(JaStartTimestamp)
+
+	freStartTime := time.Date(2024, time.February, 1, 0, 0, 0, 0, loc)
+	usWestTime(freStartTime)
+
+	freEndTime := time.Date(2024, time.March, 1, 0, 0, 0, 0, loc)
+	usWestTime(freEndTime)
+
+	logrus.Infof("%d - %d", JaStartTimestamp.Unix(), freStartTime.Unix())
+	logrus.Infof("%d - %d", freStartTime.Unix(), freEndTime.Unix())
+
+	// pvTime := time.Unix(1738464000, 0)
+	// usWestTime(pvTime)
 	// usWestTime(time.Now())
 }
 
