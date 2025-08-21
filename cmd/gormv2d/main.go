@@ -17,11 +17,13 @@ func main() {
 			ch <- i
 			time.Sleep(time.Second)
 		}
-		// 关闭 channel
-		close(ch)
-		fmt.Println("Channel 已关闭")
 	}()
+	time.Sleep(5 * time.Second)
 
+	// 关闭 channel
+
+	fmt.Println("Channel 已关闭")
+	close(ch)
 	// 3. 在主 goroutine 中，使用 for...range 循环来读取 channel 中的数据
 	fmt.Println("开始从 channel 接收数据...")
 	for v := range ch {
