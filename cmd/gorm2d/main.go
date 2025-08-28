@@ -13,11 +13,12 @@ import (
 
 func main() {
 
-	dsn := "root:12345#lxikm@tcp(127.0.0.1:3306)/coin?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := "root:12345#lxikm@tcp(127.0.0.1:3306)/coin?charset=utf8mb4&parseTime=True&loc=UTC"
 	DbEngin, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal("failed to connect database:", err)
 	}
+	DbEngin = DbEngin.Debug()
 
 	// DbEngin.Migrator().AutoMigrate(&MiniGameBetPreferenceTag{})
 	// enable := int32(1)
@@ -33,7 +34,7 @@ func main() {
 	// })
 
 	var dsin []MiniGameBetPreferenceTag
-	if err := DbEngin.Find(&dsin).Error; err != nil {
+	if err := DbEngin.Where("created_at >= ?", time.Now().Add(-1*time.Hour)).Find(&dsin).Error; err != nil {
 		panic(err)
 	}
 	bs, _ := json.Marshal(dsin)
@@ -42,22 +43,22 @@ func main() {
 
 type MiniGameBetPreferenceTag struct {
 	ID               uint64         `gorm:"column:id;type:bigint(20) unsigned;primaryKey;autoIncrement:true" json:"id"`
-	GameID           uint32         `gorm:"column:game_id;type:int(11) unsigned;not null;index:idx_game_id,priority:1;comment:所属游戏" json:"game_id"`    // 所属游戏
-	Status           *int32         `gorm:"column:status;type:tinyint(4);not null;default:2;comment:enable:1, disable: 2" json:"status"`               // enable:1, disable: 2
-	TagNameCn        string         `gorm:"column:tag_name_cn;type:varchar(255);not null;comment:标签名称（中文），用于前端展示" json:"tag_name_cn"`                  // 标签名称（中文），用于前端展示
-	TagNameEn        string         `gorm:"column:tag_name_en;type:varchar(255);not null;comment:标签名称（英文），用于前端展示" json:"tag_name_en"`                  // 标签名称（英文），用于前端展示
-	MatchCondition   string         `gorm:"column:match_condition;type:varchar(255);not null;comment:标签所对应的下注行为匹配条件，不支持后台修改" json:"match_condition"`   // 标签所对应的下注行为匹配条件，不支持后台修改
-	Option           string         `gorm:"column:option;type:varchar(255);not null;comment:偏好值,数组，目前只支持or" json:"option"`                             // 偏好值,数组，目前只支持or
-	WeightPerHit     int32          `gorm:"column:weight_per_hit;type:int(11);not null;comment:玩家每次命中该标签行为时累加的分数" json:"weight_per_hit"`               // 玩家每次命中该标签行为时累加的分数
-	TriggerThreshold int32          `gorm:"column:trigger_threshold;type:int(11);not null;comment:玩家最近100局中累计得分达到该数值才进入候选范围" json:"trigger_threshold"` // 玩家最近100局中累计得分达到该数值才进入候选范围
-	Notes            *string        `gorm:"column:notes;type:text;comment:备注信息" json:"notes"`                                                          // 备注信息
-	CreatedAt        *UTCTime       `gorm:"column:created_at;type:datetime;not null;default:CURRENT_TIMESTAMP;comment:记录创建时间" json:"created_at"`       // 记录创建时间
-	UpdatedAt        *UTCTime       `gorm:"column:updated_at;type:datetime;not null;default:CURRENT_TIMESTAMP;comment:记录最后更新时间" json:"updated_at"`     // 记录最后更新时间
+	GameID           uint32         `gorm:"column:game_id;type:int(11) unsigned;not null;index:idx_game_id,priority:1" json:"game_id"`
+	Status           *int32         `gorm:"column:status;type:tinyint(4);not null;default:2" json:"status"`
+	TagNameCn        string         `gorm:"column:tag_name_cn;type:varchar(255);not null" json:"tag_name_cn"`
+	TagNameEn        string         `gorm:"column:tag_name_en;type:varchar(255);not null" json:"tag_name_en"`
+	MatchCondition   string         `gorm:"column:match_condition;type:varchar(255);not null" json:"match_condition"`
+	Option           string         `gorm:"column:option;type:varchar(255);not null" json:"option"`
+	WeightPerHit     int32          `gorm:"column:weight_per_hit;type:int(11);not null" json:"weight_per_hit"`
+	TriggerThreshold int32          `gorm:"column:trigger_threshold;type:int(11);not null" json:"trigger_threshold"`
+	Notes            *string        `gorm:"column:notes;type:text" json:"notes"`
+	CreatedAt        *UTCTime       `gorm:"column:created_at;type:datetime;not null;default:CURRENT_TIMESTAMP" json:"created_at"`
+	UpdatedAt        *UTCTime       `gorm:"column:updated_at;type:datetime;not null;default:CURRENT_TIMESTAMP" json:"updated_at"`
 	DeletedAt        gorm.DeletedAt `gorm:"index" json:"delete_at,omitempty"`
 }
 
 func (m *MiniGameBetPreferenceTag) TableName() string {
-	return "mini_game_bet_preference_tag"
+	return "preference_tag"
 }
 
 type UTCTime struct {
