@@ -18,11 +18,23 @@ func main() {
 		log.Fatal("failed to connect database:", err)
 	}
 	var data []*MiniGameBetPreferenceTag
-	if err := DbEngin.Table("mini_game_bet_preference_tag").Find(&data).Error; err != nil {
+	if err := DbEngin.Table("mini_game_bet_preference_tag").Where("game_id", 70).Find(&data).Error; err != nil {
 		log.Fatalf("cat not query data %v", err)
 	}
 	bsm, _ := json.Marshal(data)
-	fmt.Printf("%v", string(bsm))
+	fmt.Printf("%v\n", string(bsm))
+
+	if err := DbEngin.Table("mini_game_bet_preference_tag").Where("game_id", 30).Find(&data).Error; err != nil {
+		log.Fatalf("cat not query data %v", err)
+	}
+	bsm, _ = json.Marshal(data)
+	fmt.Printf("%v\n", string(bsm))
+
+	if err := DbEngin.Table("mini_game_bet_preference_tag").Where("game_id", 10).Find(&data).Error; err != nil {
+		log.Fatalf("cat not query data %v", err)
+	}
+	bsm, _ = json.Marshal(data)
+	fmt.Printf("%v\n", string(bsm))
 
 }
 
