@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"time"
+
+	"github.com/dustin/go-humanize"
 )
 
 func main() {
@@ -18,7 +20,7 @@ func main() {
 	}
 
 	bs, _ := json.Marshal(datas)
-	fmt.Printf("data len %v \n", len(bs))
+	fmt.Printf("data len %v \n", humanize.Bytes(uint64(len(bs))))
 }
 
 type UserHandInfo struct {
