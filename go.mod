@@ -1,7 +1,5 @@
 module godemo
 
-go 1.22.3
+go 1.25.1
 
-toolchain go1.23.6
-
-require github.com/looplab/fsm v1.0.2
+require github.com/looplab/fsm v1.0.3
