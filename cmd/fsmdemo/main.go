@@ -24,7 +24,15 @@ func NewDoor(to string) *Door {
 			{Name: "close", Src: []string{"open"}, Dst: "closed"},
 		},
 		fsm.Callbacks{
-			"enter_state": func(_ context.Context, e *fsm.Event) { d.enterState(e) },
+			// "enter_state": func(_ context.Context, e *fsm.Event) { d.enterState(e) },
+			"before_open": func(_ context.Context, e *fsm.Event) {
+				if len(e.Args) == 0 {
+					return
+				}
+				fmt.Printf("cat not open by this state")
+				e.Cancel(fmt.Errorf("has same thing"))
+			},
+
 			"open": func(_ context.Context, e *fsm.Event) {
 				fmt.Printf("%s enter state %s\n", e.Src, e.Dst)
 			},
@@ -48,6 +56,17 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
+
+	err = door.FSM.Event(context.Background(), "close")
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	err = door.FSM.Event(context.Background(), "open", "xxasafsda")
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(door.FSM.Current())
 
 	err = door.FSM.Event(context.Background(), "close")
 	if err != nil {
