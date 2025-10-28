@@ -3,14 +3,14 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 func main() {
@@ -52,12 +52,12 @@ func main() {
 
 	fmt.Println("Buckets:")
 	for _, b := range resp.Buckets {
-		fmt.Println(" -", *b.Name)
+		log.Println(" -", *b.Name)
 	}
 
 	f, err := os.Open("/opt/data/apps/docker-compose.yaml")
 	if err != nil {
-		logrus.Errorf("cat not open file %v", err.Error())
+		log.Errorf("cat not open file %v", err.Error())
 		return
 	}
 	_, err = client.PutObject(ctx, &s3.PutObjectInput{
@@ -69,4 +69,23 @@ func main() {
 		log.Fatalf("upload object failed: %v", err)
 	}
 
+	url, err := GetS3PresignedURL(ctx, client, "main1", "test.txt", time.Hour)
+	if err != nil {
+		log.Errorf("cat not get presigned url for preview %w", err)
+	}
+	log.Infof("%v", url)
+}
+
+func GetS3PresignedURL(ctx context.Context, client *s3.Client, bucket, key string, expires time.Duration) (string, error) {
+
+	presignClient := s3.NewPresignClient(client)
+
+	out, err := presignClient.PresignGetObject(ctx, &s3.GetObjectInput{
+		Bucket: aws.String(bucket),
+		Key:    aws.String(key),
+	}, s3.WithPresignExpires(expires))
+	if err != nil {
+		return "", err
+	}
+	return out.URL, nil
 }
