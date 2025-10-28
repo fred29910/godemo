@@ -23,34 +23,28 @@ func main() {
 		log.Fatal("missing the env: RUSTFS_ACCESS_KEY_ID / RUSTFS_SECRET_ACCESS_KEY / RUSTFS_REGION / RUSTFS_ENDPOINT_URL")
 	}
 
-	// Custom Endpoint Resolver
-	customResolver := aws.EndpointResolverWithOptionsFunc(func(service, region string, options ...interface{}) (aws.Endpoint, error) {
-		if service == s3.ServiceID {
-			return aws.Endpoint{
-				URL:           endpointURL,
-				SigningRegion: region,
-			}, nil
-		}
-		// fallback to default resolver
-		return aws.Endpoint{}, &aws.EndpointNotFoundError{}
-	})
-
-	// Load the SDK's configuration
-	cfg, err := config.LoadDefaultConfig(context.TODO(),
-		config.WithRegion(region),
-		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(accessKeyID, secretAccessKey, "")),
-		config.WithEndpointResolverWithOptions(customResolver),
+	ctx := context.TODO()
+	cfg, err := config.LoadDefaultConfig(ctx,
+		config.WithRegion(region), // 指定东京区域
+		config.WithCredentialsProvider(
+			aws.NewCredentialsCache(credentials.NewStaticCredentialsProvider(
+				accessKeyID,
+				secretAccessKey,
+				"", // session token 可选
+			)),
+		),
 	)
+
 	if err != nil {
 		log.Fatalf("unable to load SDK config, %v", err)
 	}
 
 	// Create an S3 client
 	client := s3.NewFromConfig(cfg, func(o *s3.Options) {
+		o.BaseEndpoint = &endpointURL
 		o.UsePathStyle = true
 	})
 
-	ctx := context.TODO()
 	resp, err := client.ListBuckets(ctx, &s3.ListBucketsInput{})
 	if err != nil {
 		log.Fatalf("list buckets failed: %v", err)
