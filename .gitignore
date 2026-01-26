@@ -14,3 +14,4 @@ grpc-clicker.json
 *.log
 *.exe
 *.db
+.env

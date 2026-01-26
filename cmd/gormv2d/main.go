@@ -9,11 +9,11 @@ import (
 func main() {
 
 	jsonStr := struct {
-		Name       string    `json:"name"`
+		Name       string    `json:"name,omitempty"`
 		Age        int       `json:"age"`
 		StartTieme time.Time `json:"start_time"`
 	}{
-		Name:       "test",
+
 		Age:        10,
 		StartTieme: time.Now(),
 	}
